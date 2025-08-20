@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Sentimental Analysis</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="twitter-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="#1da1f2">
+                <path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"></path>
+            </svg>
+        </div>
+        <h1>TWITTER SENTIMENTAL ANALYSIS</h1>
+        
+    </div>
+    <div class="header-actions">
+        <button class="header-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Bookmarks
+        </button>
+        <button class="header-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Profile
+        </button>
+    </div>
+    
+    <h2 id="sub-heading">Tweet Box</h2>
+    
+    <div class="input-container">
+        <div class="tweet-header">
+            <div class="avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+        </div>
+        <textarea class="tweet-input" placeholder="What's happening?" rows="3" maxlength="280" oninput="updateCharCount(this)"></textarea>
+    </div>
+    <div class="char-count">280 characters remaining</div>
+    
+    <div class="button-container">
+        <button class="post-btn" onclick="postTweet()">Post</button>
+        <button class="analyze-btn" onclick="analyzeTweets()">Analyze Tweet</button>
+    </div>
+
+    <div class="loader hidden"></div> 
+
+    <div id="tweets-section" style="display: none;">
+        <div class="more-tweets"><h2>MORE TWEETS</h2></div>
+        
+        <div class="tweets-container ">
+            <div class="carousel" id="tweets-carousel">
+                
+            </div>
+            <div class="carousel-controls">
+                <button class="carousel-btn" onclick="scrollCarousel(-1)">
+                    <img src="arrow left.svg" alt="">
+                </button>
+                <button class="carousel-btn" onclick="scrollCarousel(1)">
+                    <img src="arrow right.svg" alt="">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="analysis-container" id="analysis-container" style="display: none;">
+        <div class="analysis-header"><h2>ANALYSIS AND CHART</h2></div>
+        
+        <div class="analysis-columns">
+            <div class="analysis-column " >
+                <div class="category-header positive-header">
+                    <span class="category-badge" style="background-color:green">✓</span>
+                    POSITIVE
+                </div>
+                <div class="analysis-box positiveblur">
+                    <div class="slideshow" id="positive-slideshow">
+                        <!-- Positive tweets will go here as slideshow -->
+                    </div>
+                    <div class="slideshow-controls" id="positive-controls"></div>
+                </div>
+            </div>
+            
+            <div class="analysis-column">
+                <div class="category-header negative-header">
+                    <span class="category-badge" style="background-color:red">✗</span>
+                    NEGATIVE
+                </div>
+                <div class="analysis-box negativeblur">
+                    <div class="slideshow" id="negative-slideshow">
+                        <!-- Negative tweets will go here as slideshow -->
+                    </div>
+                    <div class="slideshow-controls" id="negative-controls"></div>
+                </div>
+            </div>
+            
+            <div class="analysis-column">
+                <!-- <div class="chart-container" id="chart-container">
+                    
+                </div> -->
+                <div id="chart-container">
+                    <canvas id="sentimentChart"></canvas>
+                </div>                
+            </div>
+        </div>
+        
+        <div class="mood-box">
+            <div class="mood-title">OVERALL SENTIMENT</div>
+            <div id="overall-mood">No tweets analyzed yet</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
