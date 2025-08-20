@@ -26,17 +26,13 @@ It includes:
   - `label` – Sentiment label (Positive, Negative, Neutral)  
 
 ### **Dataset Source**
-Due to GitHub file size restrictions, the dataset can be accessed from:  
-[Google Drive / Kaggle / Hugging Face Link Here]
-
-*(Upload the CSV to Google Drive, share link, and replace above.)*
-
+Due to GitHub file size restrictions, the dataset twitter data.csv is to be downloaded.
 ---
 
 ## **Project Structure**
 TwitterSentimentalAnalysis/
 │
-├── data/ # (Optional) Folder for dataset
+├── data/ # Folder for dataset
 ├── model/ # Trained models
 ├── README.md # Project documentation
 └── app.py # Web/CLI application script
@@ -51,9 +47,3 @@ TwitterSentimentalAnalysis/
 
 ---
 
-## **Setup Instructions**
-
-### **1. Clone Repository**
-```bash
-git clone https://github.com/RishabhNegi0314/Sentimental_Analysis_Project.git
-cd Sentimental_Analysis_Project
