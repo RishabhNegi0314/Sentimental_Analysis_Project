@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Sentimental Analysis</title>
+    <meta name="description" content="Analyze sentiment and emotional tone of tweets with interactive sentiment scoring, confidence metrics, and visual distribution charts.">
+    <meta property="og:title" content="Twitter Sentimental Analysis">
+    <meta property="og:description" content="Analyze sentiment and emotional tone of tweets with interactive sentiment scoring, confidence metrics, and visual distribution charts.">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .notification-toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(248, 63, 63, 0.4);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(248, 63, 63, 0.25);
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 3000;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .notification-toast.hidden {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Ambient Luminous Mesh for Glassmorphic Depth -->
+    <div class="glass-ambient-background">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+        <div class="ambient-orb orb-4"></div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="notification-toast hidden"></div>
+
+    <div class="app-container">
+        <!-- Glass Header -->
+        <header class="header-wrapper">
+            <div class="header-left">
+                <div class="twitter-icon-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#1da1f2">
+                        <path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"></path>
+                    </svg>
+                </div>
+                <div class="app-title-group">
+                    <h1>Twitter Sentimental Analysis</h1>
+                    <span class="subtitle">Real-time NLP sentiment classification</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button class="glass-nav-btn" onclick="openHistoryModal()" title="View search and analysis history">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    History <span class="bookmark-counter" id="historyCount">0</span>
+                </button>
+                <button class="glass-nav-btn" onclick="openBookmarksModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Bookmarks <span class="bookmark-counter" id="bookmarkCount">0</span>
+                </button>
+                <button class="glass-nav-btn" onclick="openProfileModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Analytics
+                </button>
+            </div>
+        </header>
+
+        <!-- Glass Tweet Box Composer -->
+        <section class="composer-card">
+            <div class="composer-header">
+                <div class="section-tag">
+                    <span class="dot"></span>
+                    <span>Tweet Box</span>
+                </div>
+                <div class="quick-samples">
+                    <span class="quick-label">Try sample:</span>
+                    <button type="button" class="sample-chip" onclick="loadSampleTweet('positive')">Positive</button>
+                    <button type="button" class="sample-chip" onclick="loadSampleTweet('negative')">Negative</button>
+                    <button type="button" class="sample-chip" onclick="loadSampleTweet('mixed')">Nuanced</button>
+                    <button type="button" class="sample-chip" onclick="loadSampleThread()" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;" title="Load 5 tweets across a chronological timeline to test Trend Line">✦ Load Timeline Thread (5)</button>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="avatar-glass">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="textarea-wrapper">
+                    <textarea class="tweet-input" placeholder="What's happening? Type a tweet or customer review to analyze..." rows="3" maxlength="280" oninput="updateCharCount(this)"></textarea>
+                </div>
+            </div>
+
+            <div class="composer-footer">
+                <div class="char-count">280 characters remaining</div>
+                <div class="button-container">
+                    <button class="glass-btn post-btn" onclick="postTweet()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Tweet
+                    </button>
+                    <button class="glass-btn analyze-btn" onclick="analyzeTweets()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        Analyze Sentiment
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Search History Chips -->
+            <div class="recent-history-bar" id="recentHistoryBar" style="display: none;">
+                <span class="quick-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 2px;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Recent:
+                </span>
+                <div class="history-chips-container" id="recentHistoryChips"></div>
+            </div>
+        </section>
+
+        <!-- Loader Spinner -->
+        <div class="loader-wrapper loader hidden">
+            <div class="glass-spinner"></div>
+        </div>
+
+        <!-- Tweets Carousel Section -->
+        <section id="tweets-section" class="section-wrapper" style="display: none;">
+            <div class="section-glass-header">
+                <h2>
+                    <span class="sparkle">✦</span>
+                    Analyzed Tweets Carousel
+                </h2>
+            </div>
+            
+            <div class="tweets-container">
+                <button class="carousel-btn left-btn" onclick="scrollCarousel(-1)" aria-label="Scroll left">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <div class="carousel" id="tweets-carousel"></div>
+                <button class="carousel-btn right-btn" onclick="scrollCarousel(1)" aria-label="Scroll right">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Analysis & Chart Section -->
+        <section class="analysis-container" id="analysis-container" style="display: none;">
+            <div class="analysis-header-card">
+                <div class="analysis-title-group">
+                    <h2>Sentiment Breakdown & Visuals</h2>
+                    <span class="analysis-subtitle">Session classification summary</span>
+                </div>
+                <div class="export-actions">
+                    <span class="export-label">Export:</span>
+                    <button type="button" class="glass-export-btn" onclick="exportResults('json')" title="Download session results as formatted JSON">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        JSON
+                    </button>
+                    <button type="button" class="glass-export-btn" onclick="exportResults('txt')" title="Download session results as text report">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        TXT Report
+                    </button>
+                </div>
+            </div>
+            
+            <div class="analysis-columns">
+                <!-- Positive Column -->
+                <div class="analysis-column">
+                    <div class="category-header positive-header">
+                        <span class="category-badge badge-green">✓</span>
+                        Positive Tweets
+                    </div>
+                    <div class="analysis-box positiveblur">
+                        <div class="slideshow" id="positive-slideshow"></div>
+                        <div class="slideshow-controls" id="positive-controls"></div>
+                    </div>
+                </div>
+                
+                <!-- Negative Column -->
+                <div class="analysis-column">
+                    <div class="category-header negative-header">
+                        <span class="category-badge badge-red">✗</span>
+                        Negative Tweets
+                    </div>
+                    <div class="analysis-box negativeblur">
+                        <div class="slideshow" id="negative-slideshow"></div>
+                        <div class="slideshow-controls" id="negative-controls"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trend Analysis Line Chart Card -->
+            <div class="trend-chart-card">
+                <div class="trend-card-header">
+                    <div class="trend-header-left">
+                        <div class="trend-icon-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                <polyline points="17 6 23 6 23 12"></polyline>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Sentiment Trend Analysis</h3>
+                            <span class="trend-sub">Chronological trajectory of tweet sentiment polarity over time</span>
+                        </div>
+                    </div>
+                    <div class="trend-header-right">
+                        <div id="trendDirectionBadge" class="trend-direction-badge neutral">
+                            <span>●</span>
+                            <span id="trendDirectionText">Calculating trend...</span>
+                        </div>
+                        <div class="chart-tab-group">
+                            <button type="button" class="chart-tab-btn active" id="tabTrend" onclick="switchChartView('trend')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                                Trend Line
+                            </button>
+                            <button type="button" class="chart-tab-btn" id="tabDistribution" onclick="switchChartView('distribution')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 2a10 10 0 0 1 10 10h-10z"></path>
+                                </svg>
+                                Ratio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trend-canvas-container">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+
+                <div class="trend-telemetry-grid">
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Net Polarity</div>
+                        <div class="telemetry-val" id="telemetryNetPolarity">0.00</div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Trend Momentum</div>
+                        <div class="telemetry-val" id="telemetryMomentum">Neutral</div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Peak Confidence</div>
+                        <div class="telemetry-val" id="telemetryPeakConfidence">0%</div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Timeline Sequence</div>
+                        <div class="telemetry-val" id="telemetryDataPoints">0 tweets</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Overall Mood Glass Banner -->
+            <div class="mood-box">
+                <div class="mood-title">Overall Sentiment Score</div>
+                <div id="overall-mood">No tweets analyzed yet</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Frosted Bookmarks Modal -->
+    <div id="bookmarksModal" class="glass-modal-backdrop" onclick="closeModalOnBackdrop(event, 'bookmarksModal')">
+        <div class="glass-modal">
+            <div class="modal-header">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1da1f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Saved Bookmarks
+                </h3>
+                <button class="modal-close-btn" onclick="closeModal('bookmarksModal')" aria-label="Close">✕</button>
+            </div>
+            <div id="bookmarksList" class="bookmark-list">
+                <p style="color: var(--text-dim); text-align: center; padding: 20px 0;">No saved tweets yet. Click the bookmark icon on any tweet card to save it here.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Frosted Profile Analytics Modal -->
+    <div id="profileModal" class="glass-modal-backdrop" onclick="closeModalOnBackdrop(event, 'profileModal')">
+        <div class="glass-modal">
+            <div class="modal-header">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1da1f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Session Analytics & Health
+                </h3>
+                <button class="modal-close-btn" onclick="closeModal('profileModal')" aria-label="Close">✕</button>
+            </div>
+            <div class="profile-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Tweets</div>
+                    <div class="stat-value" id="statTotal">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Positive Sentiment</div>
+                    <div class="stat-value" style="color: #4ade80;" id="statPositive">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Negative Sentiment</div>
+                    <div class="stat-value" style="color: #f87171;" id="statNegative">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Confidence</div>
+                    <div class="stat-value" style="color: #38bdf8;" id="statConfidence">0%</div>
+                </div>
+            </div>
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <span class="export-label">Download Session Data:</span>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="glass-export-btn" onclick="exportResults('json')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        JSON
+                    </button>
+                    <button type="button" class="glass-export-btn" onclick="exportResults('txt')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                        </svg>
+                        TXT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Frosted Search History Modal -->
+    <div id="historyModal" class="glass-modal-backdrop" onclick="closeModalOnBackdrop(event, 'historyModal')">
+        <div class="glass-modal">
+            <div class="modal-header">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1da1f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Search &amp; Analysis History
+                </h3>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" class="history-clear-btn" id="historyClearBtn" onclick="clearSearchHistory()" title="Clear all search history">Clear All</button>
+                    <button class="modal-close-btn" onclick="closeModal('historyModal')" aria-label="Close">✕</button>
+                </div>
+            </div>
+            <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px;">Last 10 analyzed queries saved locally. Click "Re-analyze" on any item to instantly re-evaluate sentiment.</p>
+            <div id="historyList" class="history-list"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

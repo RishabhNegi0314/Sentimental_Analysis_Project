@@ -1,0 +1,15 @@
+{
+  "name": "twitter-sentimental-analysis",
+  "version": "1.0.0",
+  "description": "Twitter Sentimental Analysis application migrated to Node.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node -e \"console.log('Build successful')\""
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

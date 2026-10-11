@@ -1,0 +1,8 @@
+{
+  "name": "Twitter Sentimental Analysis",
+  "description": "Analyze sentiment and emotional tone of tweets with interactive sentiment scoring, confidence metrics, and visual distribution charts.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
