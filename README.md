@@ -1,6 +1,7 @@
 # Sentimental_Analysis_Project
 
 # Twitter Sentimental Analysis
+Live Link : https://sentimental-analysis-project-tdaw.onrender.com/
 
 A machine learning project to analyze sentiment (positive, negative, neutral) from tweets.  
 This project demonstrates text preprocessing, feature extraction, model training, and prediction.
